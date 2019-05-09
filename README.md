@@ -4,7 +4,12 @@
 Addons:
 
 ofxArtnet
+https://github.com/hiroyuki/ofxArtnet
 ofxFastFboReader
+https://github.com/satoruhiga/ofxFastFboReader
 ofxImGui
+https://github.com/jvcleave/ofxImGui
 ofxNetwork
+https://github.com/openframeworks/openFrameworks/tree/master/addons/ofxNetwork
 ofxSyphon
+https://github.com/astellato/ofxSyphon
