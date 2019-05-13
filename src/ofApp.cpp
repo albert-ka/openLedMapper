@@ -221,15 +221,20 @@ void ofApp::draw()
     gui.begin();
     gui.setTheme(new MyTheme());
     ImGui::StyleColorsDark();
-    ImGui::SetNextWindowPos(ofVec2f(650,2),ImGuiSetCond_FirstUseEver); // ??? Doesn't work
+    ImGui::SetWindowPos(ofVec2f(650,5),ImGuiSetCond_FirstUseEver); // ??? Doesn't work
         
     ImGui::Begin("Led Mapper");
     
         if (ImGui::Button("ADD NEW FIXTURE"))
         {
             myLedStrips.push_back(LedStrip());
+            
         }
-        ImGui::End();
+    
+    //cout << ImGui::GetIO().MouseDelta.x << " " << ImGui::GetIO().MouseDelta.y;
+    
+    ImGui::InputText("Controller IP", ipAdress, 15);
+    ImGui::End();
     
     //required to call this at end
     gui.end();
@@ -292,6 +297,12 @@ void ofApp::mouseMoved(int x, int y)
 void ofApp::mouseDragged(int x, int y, int button)
 {
     
+     for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
+         
+         (*itLS).move(x,y);
+     }
+    
+     //cout << "test   " << x << " , " << y << " , " << button << endl;
 }
 
 //--------------------------------------------------------------

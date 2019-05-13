@@ -17,11 +17,11 @@ public:
     LedStrip();
     // TODO: destructor
     
-    void setup(ofVec2f _x1y1, ofVec2f _x2y2); // Here we are going to setup or LedStripe properties
-    
     void setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstChannel, int _startUniverse); // Here we are going to setup or LedStripe properties
     
     void update(); // This function is going to update the Led stripe when modified through the GUI?
+    
+    void move(int x, int y);
     
     void readPixels(ofPixels & screenPixels); // Here we are going to read the pixels and store it
     
@@ -29,7 +29,9 @@ public:
     
     void drawColor(); // Here we are going to draw the LedStripe in our program
     
-    void setPosition(ofVec2f _x1y1, ofVec2f _x2y2); // Necessary???
+    void setPosition(ofVec2f _x1y1, ofVec2f _x2y2); // To update the position while moving through the GUI
+    
+    void setChUn(int _firstCh, int _firstUn);
     // crear setNumLeds
     // crear getPosition i getNumLeds
     

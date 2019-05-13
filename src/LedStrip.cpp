@@ -24,77 +24,6 @@ LedStrip::LedStrip(){
     setup(initialPos1,initialPos2,20,0,0); //By default 200 pixels long strip with 20 LEDs and first channel = 0 and start universe = 0
     
 }
-void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2){
-    
-    x1y1 = _x1y1;
-    x2y2 = _x2y2;
-    length = x1y1.distance(x2y2); // By now unused, is it necessary?
-    stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
-    stepY = (x2y2[1]-x1y1[1])/(numLeds*2);
-    radius = round(sqrt(stepX*stepX+stepY*stepY)); //TODO: Radius automatic or adjusted through the GUI???
-    numCh = numLeds*3; // By now R-G-B only Led Strips
-    lastCh = 0; // TO DO: Read the last element of myLedStripChannels.channel
-    lastUn = 0; // TO DO: Read the last element of myLedStripChannels.chUniverse
-    
-    //Here we allocate the number of LEDs of the strip
-    
-    for( int i = 0; i<numLeds; i++){
-        ledPixel myLed;
-        myLedStripPixels.push_back(myLed);
-        myLedStripPixels.at(i).ledIndex = i+1;
-    }
-    
-    //Here we allocate the number of channels of the whole strip
-    
-    for( int i = 0; i<numCh; i++){
-        ledStripChannels myCh;
-        myLedStripChannels.push_back(myCh);
-    }
-    
-    //If we full all the "usable" channels of the universe, reset channel and increase universe
-    //For example the usable channels of one universe go from 0.....509, 510 and 511 are not used (?)
-    //so once we exceed the channel 509 we have to send to the next universe.
-    
-    int universe = 0;
-    int channel = 0;
-    
-    for( int i = 0; i<numCh; i++){
-        
-        unsigned char zero = '0';
-        
-        if ( (((firstCh + channel) == 510) && universe == 0) || (channel == 510) ){
-            channel = 0;
-            universe++;
-        }
-        
-        if (universe == 0 ){
-            myLedStripChannels.at(i).channel = firstCh + channel;
-            
-        }else {
-            myLedStripChannels.at(i).channel = channel;
-            
-        }
-        
-        myLedStripChannels.at(i).chValue = zero;
-        myLedStripChannels.at(i).chUniverse = firstUn + universe;
-        channel++;
-        
-    }
-    
-    //Here we assing the position of every LED, note the round inside ofVec2f due to we work with -float- increments but -int- pixels
-    
-    int counter = 0;
-    for (int i=1; i<numLeds*2; i=i+2){
-        myLedStripPixels.at(counter).position = ofVec2f(round(x1y1[0]+i*stepX) , round(x1y1[1]+i*stepY));
-        myLedStripPixels.at(counter).ledIndex = counter+1; //Id of the pixels, first LED = 1
-        counter++;
-    }
-    
-    lastCh = myLedStripChannels.at(numCh-1).channel;
-    lastUn = myLedStripChannels.at(numCh-1).chUniverse;
-    
-    
-}
 void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstCh, int _firstUn){
 
     x1y1 = _x1y1;
@@ -168,11 +97,81 @@ void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstCh, i
     
     
 }
+void LedStrip::setChUn(int _firstCh, int _firstUn){
+    
+    firstCh = _firstCh;
+    firstUn = _firstUn;
+    numCh = numLeds*3; // By now R-G-B only Led Strips
+    lastCh = 0; // TO DO: Read the last element of myLedStripChannels.channel
+    lastUn = 0; // TO DO: Read the last element of myLedStripChannels.chUniverse
+
+    //If we full all the "usable" channels of the universe, reset channel and increase universe
+    //For example the usable channels of one universe go from 0.....509, 510 and 511 are not used (?)
+    //so once we exceed the channel 509 we have to send to the next universe.
+    
+    int universe = 0;
+    int channel = 0;
+    
+    for( int i = 0; i<numCh; i++){
+        
+        unsigned char zero = '0';
+        
+        if ( (((firstCh + channel) == 510) && universe == 0) || (channel == 510) ){
+            channel = 0;
+            universe++;
+        }
+        
+        if (universe == 0 ){
+            myLedStripChannels.at(i).channel = firstCh + channel;
+            
+        }else {
+            myLedStripChannels.at(i).channel = channel;
+            
+        }
+        
+        myLedStripChannels.at(i).chValue = zero;
+        myLedStripChannels.at(i).chUniverse = firstUn + universe;
+        channel++;
+        
+    }
+ 
+    lastCh = myLedStripChannels.at(numCh-1).channel;
+    lastUn = myLedStripChannels.at(numCh-1).chUniverse;
+    
+    
+}
+void LedStrip::move(int x, int y){
+    
+    if (ofDist(x, y, x1y1.x, x1y1.y) <= (radius+50)) {
+        // Mouse is inside of circle
+        x1y1.set(x,y);
+        setPosition(x1y1,x2y2);
+    }
+    
+    if (ofDist(x, y, x2y2.x, x2y2.y) <= (radius+50)) {
+        // Mouse is inside of circle
+        x2y2.set(x,y);
+        setPosition(x1y1,x2y2);
+    }
+    
+}
 void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
     
-    //TODO: call to setup passing only position parameters
-   
+    x1y1 = _x1y1;
+    x2y2 = _x2y2;
+    length = x1y1.distance(x2y2); // By now unused, is it necessary?
+    stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
+    stepY = (x2y2[1]-x1y1[1])/(numLeds*2);
+    radius = round(sqrt(stepX*stepX+stepY*stepY)); //TODO: Radius automatic or adjusted through the GUI???
     
+    //Here we assing the position of every LED, note the round inside ofVec2f due to we work with -float- increments but -int- pixels
+    
+    int counter = 0;
+    for (int i=1; i<numLeds*2; i=i+2){
+        myLedStripPixels.at(counter).position = ofVec2f(round(x1y1[0]+i*stepX) , round(x1y1[1]+i*stepY));
+        myLedStripPixels.at(counter).ledIndex = counter+1; //Id of the pixels, first LED = 1
+        counter++;
+    }
 }
 
 void LedStrip::readPixels(ofPixels & screenPixels){
