@@ -13,6 +13,8 @@ public:
     void update();
     void draw();
     
+    void setupArtnet(char ipAdress[15],int totalNumUn);
+    void updateStripsId();
     void keyPressed(int key);
     void keyReleased(int key);
     void mouseMoved(int x, int y);
@@ -23,6 +25,7 @@ public:
     void dragEvent(ofDragInfo dragInfo);
     void gotMessage(ofMessage msg);
     
+    void swapSyphon();
     void serverAnnounced(ofxSyphonServerDirectoryEventArgs &arg);
     void serverUpdated(ofxSyphonServerDirectoryEventArgs &args);
     void serverRetired(ofxSyphonServerDirectoryEventArgs &arg);
@@ -36,6 +39,8 @@ public:
     int drawMode = 0; //LedMapper drawing modes
     bool resizeMode = true; //For Adobe After Effects plugin at 1024x640. It streches the Syphon source to full resolution.
     bool mouseState;
+    int ledStripFlag = -1;
+    bool idAssignDone = false;
     
     vector <LedStrip> myLedStrips;
     
@@ -49,30 +54,16 @@ public:
     // -- Artnet -- //
     
     //ofxArtnetSender artnet;
-    int totalNumUn = 8;
-    char ipAdress[15] = "192.168.2.3";
-    //std::vector<shared_ptr<ofxArtnetSender>> artnetController;
+    bool artnetSetup = false;
+    int totalNumUn = 1;
+    char ipAdress[15] = "0.0.0.0";
     std::vector<ofxArtnetSender> artnetController;
-    
-    //PROBLEMS! Vector de arrays unsigned char[512] ... why not??
-    
-    //vector<vector<unsigned char>> universe;
     
     struct controllerUniverse{
         unsigned char universe[512];
     };
     
     std::vector<controllerUniverse> myControllerUniverses;
-    
-    
-    //std::array<unsigned char, 512> universe;
-    
-    //using universe = std::array<unsigned char, 512>;
-    //std::vector <universe> myControllerUniverses;
-    
-    //std::vector<std::array<double, 4>> blabla;
-    
-    
     
     // ------ **** ImGUi **** ------ //
     

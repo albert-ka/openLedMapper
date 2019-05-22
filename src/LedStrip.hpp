@@ -19,13 +19,17 @@ public:
     
     void setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstChannel, int _startUniverse); // Here we are going to setup or LedStripe properties
     
-    void update(); // This function is going to update the Led stripe when modified through the GUI?
+    void setID(int _stripId);
+    
+    int getId();
     
     void move(int x, int y);
     
+    bool mouseInside(int x,int y);
+    
     void readPixels(ofPixels & screenPixels); // Here we are going to read the pixels and store it
     
-    void drawNoFill(); // Here we are going to draw the LedStripe in our program
+    void drawNoFill(int _ledStripFlag); // Here we are going to draw the LedStripe in our program
     
     void drawColor(); // Here we are going to draw the LedStripe in our program
     
@@ -68,7 +72,7 @@ private:
     float length;
     float stepX;
     float stepY;
-    int stripId;
+    int stripID;
     int firstCh;
     int lastCh;
     int firstUn;
@@ -76,7 +80,6 @@ private:
     int numCh;
     
     vector <ledPixel> myLedStripPixels; //Tamany numLeds
-    //vector <unsigned char> myLedStripChannels; //Tamany 3*numLeds
     vector <ledStripChannels> myLedStripChannels;
     
 };

@@ -16,11 +16,6 @@ LedStrip::LedStrip(){
     ofVec2f initialPos2;
     initialPos1.set(500,50);
     initialPos2.set(800,50);
-    /*int rand1 = (int)ofRandom(0,200);
-    int rand2 = (int)ofRandom(0,200);
-    initialPos1.set(500+rand1,50+rand2);
-    initialPos2.set(800+rand1,50+rand2);
-    */
     setup(initialPos1,initialPos2,20,0,0); //By default 200 pixels long strip with 20 LEDs and first channel = 0 and start universe = 0
     
 }
@@ -72,10 +67,8 @@ void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstCh, i
         
         if (universe == 0 ){
             myLedStripChannels.at(i).channel = firstCh + channel;
-
         }else {
             myLedStripChannels.at(i).channel = channel;
-            
         }
         
         myLedStripChannels.at(i).chValue = zero;
@@ -96,6 +89,14 @@ void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstCh, i
     lastUn = myLedStripChannels.at(numCh-1).chUniverse;
     
     
+}
+void LedStrip::setID(int _stripID){
+    stripID = _stripID;
+}
+
+int LedStrip::getId(){
+    
+    return stripID;
 }
 void LedStrip::setChUn(int _firstCh, int _firstUn){
     
@@ -123,18 +124,14 @@ void LedStrip::setChUn(int _firstCh, int _firstUn){
         
         if (universe == 0 ){
             myLedStripChannels.at(i).channel = firstCh + channel;
-            
         }else {
             myLedStripChannels.at(i).channel = channel;
-            
         }
-        
+
         myLedStripChannels.at(i).chValue = zero;
         myLedStripChannels.at(i).chUniverse = firstUn + universe;
         channel++;
-        
     }
- 
     lastCh = myLedStripChannels.at(numCh-1).channel;
     lastUn = myLedStripChannels.at(numCh-1).chUniverse;
     
@@ -153,6 +150,13 @@ void LedStrip::move(int x, int y){
         x2y2.set(x,y);
         setPosition(x1y1,x2y2);
     }
+    
+}
+bool LedStrip::mouseInside(int x,int y){
+    
+    if ( (x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius)) ){
+        return true;
+    } else return false;
     
 }
 void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
@@ -177,9 +181,7 @@ void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
 void LedStrip::readPixels(ofPixels & screenPixels){
 
     for (int i=0; i<numLeds; i++){
-        
         int indexArray = (myLedStripPixels.at(i).position.y*screenPixels.getWidth()+myLedStripPixels.at(i).position.x)*3;
-        
         myLedStripPixels.at(i).ledColor[0] = screenPixels[indexArray];
         myLedStripPixels.at(i).ledColor[1] = screenPixels[indexArray+1];
         myLedStripPixels.at(i).ledColor[2] = screenPixels[indexArray+2];
@@ -208,7 +210,6 @@ std::pair<int,int> LedStrip::getLastChLastUn(){
     
     return firstLastUn;
 }
-
 std::pair<int,int> LedStrip::getNextStripChUn(){
     
     std::pair<int,int> nextStripChUn;
@@ -217,31 +218,27 @@ std::pair<int,int> LedStrip::getNextStripChUn(){
     return nextStripChUn;
     
 }
-
-
 vector <LedStrip::ledStripChannels> LedStrip::getChannels(){
     
     for (int i=0; i<numLeds; i++){
-        
         myLedStripChannels.at(0+i*3).chValue = myLedStripPixels.at(i).ledColor[0];
         myLedStripChannels.at(1+i*3).chValue = myLedStripPixels.at(i).ledColor[1];
         myLedStripChannels.at(2+i*3).chValue = myLedStripPixels.at(i).ledColor[2];
-        
     }
     
     return myLedStripChannels;
 }
-
-void LedStrip::drawNoFill(){
+void LedStrip::drawNoFill(int _ledStripFlag){
     
     //color = _c;
     ofNoFill();
-    //ofColor(255,0,0);
+    
+    if ( _ledStripFlag == stripID){
+    ofSetColor(255,0,0);
+    } else ofSetColor(255);
     
     for (int i=0; i<numLeds; i++){
-        
         ofDrawCircle(myLedStripPixels.at(i).position.x,myLedStripPixels.at(i).position.y,radius);
-        
     }
 }
 void LedStrip::drawColor(){
@@ -249,11 +246,9 @@ void LedStrip::drawColor(){
     ofFill();
     
     for (int i=0; i<numLeds; i++){
-        
         int r =(int)myLedStripPixels.at(i).ledColor[0];
         int g =(int)myLedStripPixels.at(i).ledColor[1];
         int b =(int)myLedStripPixels.at(i).ledColor[2];
-        
         ofFill();
         ofPath circle;
         circle.arc(myLedStripPixels.at(i).position.x,myLedStripPixels.at(i).position.y , radius, radius, 0, 360);
@@ -262,23 +257,4 @@ void LedStrip::drawColor(){
         circle.draw();
             
     }
-}
-void LedStrip::update(){
-    
-    //TODO: call to setup? -> For example when moving the LedStrip or modifying the stratChannel or Universe.
-  
-        
-        /*if (ofDist(ofGetMouseX(), ofGetMouseY(), x1y1.x, x1y1.y) <= radius) {
-            // Mouse is inside of circle
-            x1y1.set(ofGetMouseX(),ofGetMouseY());
-            LedStrip::setup(x1y1,x2y2);
-        }*/
-
-    
-   /* if (ofDist(mouseX, mouseY, x2y2.x, x2y2.y) <= radius) {
-        // Mouse is inside of circle
-        
-    }*/
-    
-    
 }

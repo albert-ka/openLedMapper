@@ -12,7 +12,7 @@ void MyTheme::setup()
     
     style->WindowMinSize = ImVec2(160, 65);
     style->FramePadding = ImVec2(4, 2);
-    style->ItemSpacing = ImVec2(6, 2);
+    style->ItemSpacing = ImVec2(6, 6);
     style->ItemInnerSpacing = ImVec2(6, 4);
     style->Alpha = 1.0f;
     style->WindowRounding = 14.0f;
@@ -21,8 +21,8 @@ void MyTheme::setup()
     style->ItemInnerSpacing = ImVec2(2, 4);
     style->ColumnsMinSpacing = 50.0f;
     style->GrabMinSize = 14.0f;
-    style->GrabRounding = 10.0f;
-    style->ScrollbarSize = 12.0f;
+    style->GrabRounding = 12.0f;
+    style->ScrollbarSize = 16.0f;
     style->ScrollbarRounding = 10.0f;
     
     
