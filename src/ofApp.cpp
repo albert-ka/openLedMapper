@@ -163,13 +163,13 @@ void ofApp::draw()
     
     //Abans ficar les coses que toquen, si ja hem afegit una tira, despres
     
-    ImGui::Text("Fixture config");
+    ImGui::Text("Nex Fixture config:");
     ImGui::Text("Num LEDs");
     ImGui::InputInt("  ",&auxNumLeds);
     ImGui::Text("Start Universe");
     ImGui::InputInt("   ",&auxStartUn);
     ImGui::Text("Start Channel");
-    ImGui::InputInt("   ",&auxStartCh);
+    ImGui::InputInt("    ",&auxStartCh);
     
     if (ImGui::Button("Add Nex Fixture")){
         myLedStrips.push_back(LedStrip());
@@ -178,6 +178,17 @@ void ofApp::draw()
         auxStartUn = myLedStrips.back().getLastChLastUn().second;
         auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
         //cout << myLedStrips.size();
+    }
+    
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::Text("Edit Fixture:");
+    
+    if(ledStripFlag == -1){
+         ImGui::TextColored(ImVec4(1.0f,0.0f,0.0f,1.0f), "No fixture selected!");
+    }else {
+        ImGui::Text("Some things to do here...");
     }
     
     //TO-DO: Cool delete button in red, dilema with the ledStripFlag, gets updated to -1 when pressing the button, it never erases anything.
