@@ -41,11 +41,13 @@ public:
     bool mouseState;
     int ledStripFlag = -1;
     bool idAssignDone = false;
+    int auxNumLeds = 20;
+    int auxStartCh = 0;
+    int auxStartUn = 0;
     
     vector <LedStrip> myLedStrips;
     
     //LedStrip myLedStrip;
-
     //unsigned char universe[512];
     
     ofColor col;
@@ -71,14 +73,11 @@ public:
     ImVec4 backgroundColor;
     bool show_test_window;
     bool show_another_window;
-    
     float floatValue;
     ofImage imageButtonSource;
     GLuint imageButtonID;
-    
     ofPixels pixelsButtonSource;
     GLuint pixelsButtonID;
-    
     ofTexture textureSource;
     GLuint textureSourceID;
     

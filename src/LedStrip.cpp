@@ -12,17 +12,12 @@
 
 LedStrip::LedStrip(){
     
-    ofVec2f initialPos1;
-    ofVec2f initialPos2;
-    initialPos1.set(500,50);
-    initialPos2.set(800,50);
-    setup(initialPos1,initialPos2,20,0,0); //By default 200 pixels long strip with 20 LEDs and first channel = 0 and start universe = 0
-    
+    setup(20,0,0); //By default 200 pixels long strip with 20 LEDs and first channel = 0 and start universe = 0
 }
-void LedStrip::setup(ofVec2f _x1y1, ofVec2f _x2y2, int _numLeds, int _firstCh, int _firstUn){
-
-    x1y1 = _x1y1;
-    x2y2 = _x2y2;
+void LedStrip::setup(int _numLeds, int _firstUn,  int _firstCh){
+    
+    x1y1.set(500,50);
+    x2y2.set(800,50);
     numLeds = _numLeds;
     length = x1y1.distance(x2y2); // By now unused, is it necessary?
     stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
@@ -139,6 +134,9 @@ void LedStrip::setChUn(int _firstCh, int _firstUn){
 }
 void LedStrip::move(int x, int y){
     
+    // TRY TO USE THIS FROM IMGUI TO GET MOUSE DELTA!!! TODO: Drag the strip from the middle, not only the corners
+    //cout << ImGui::GetIO().MouseDelta.x << " " << ImGui::GetIO().MouseDelta.y;
+
     if (ofDist(x, y, x1y1.x, x1y1.y) <= (radius+50)) {
         // Mouse is inside of circle
         x1y1.set(x,y);
@@ -154,10 +152,35 @@ void LedStrip::move(int x, int y){
 }
 bool LedStrip::mouseInside(int x,int y){
     
-    if ( (x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius)) ){
+    /*if((x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius))) cout << "X inside" << endl;
+    if((y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))) cout << "Y inside" << endl;
+        
+    if ((x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))){
         return true;
-    } else return false;
+    } else if ((x < (x1y1[0]-radius)) && (x > (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))){
+        return true;
+    } else return false;*/
+
     
+    /*bool aux;
+    for (int i=0; i<numLeds; i++){
+        if((pow(myLedStripPixels.at(i).position.x-x,2) + pow(myLedStripPixels.at(i).position.y-y,2)) < (radius,2)){
+            aux =  true;
+            goto afterLoop;
+        } else aux = false;
+    }
+    afterLoop:
+    return aux;*/
+    
+     bool aux;
+     for (int i=0; i<numLeds; i++){
+         if(ofDist(x,y,myLedStripPixels.at(i).position.x,myLedStripPixels.at(i).position.y) <= (radius)){
+             aux =  true;
+             goto afterLoop;
+         } else aux = false;
+     }
+     afterLoop:
+     return aux;
 }
 void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
     

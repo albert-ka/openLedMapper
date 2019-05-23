@@ -31,21 +31,7 @@ void ofApp::setup()
     //-- Led Mapper Part --//
     
     // *Artnet Setup* //
-    
     setupArtnet(ipAdress,totalNumUn);
- 
-    // *Led Strips Setup* //
-    
-    //myLedStrips.push_back(LedStrip());
-    //myLedStrips.push_back(LedStrip());
-    //myLedStrips.push_back(LedStrip());
-    //myLedStrips.push_back(LedStrip());
-
-    
-    //myLedStrips[0].setup(ofVec2f(200,50),ofVec2f(600,50),10,505,0);
-    //myLedStrips[1].setup(ofVec2f(600,150),ofVec2f(1000,150),10,myLedStrips[0].getNextStripChUn().first,myLedStrips[0].getNextStripChUn().second);
-    
-    //myLedStrips[2].setup(ofVec2f(100,50),ofVec2f(100,700),30,0,4);
 
     // ----- ***** ImGui **** ------ //
     
@@ -94,7 +80,6 @@ void ofApp::update()
     for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
         //Read pixels from buffer to LedStrip instances
         (*itLS).readPixels(screenPixels);
-        //(*itLS).update();
         for (int i = (*itLS).getFirstChFirstUn().second; i<=(*itLS).getLastChLastUn().second ; i++){
             for (int j = 0 ; j<(*itLS).getNumCh(); j++){
                 myControllerUniverses[i].universe[(*itLS).getChannels()[j].channel] = (*itLS).getChannels()[j].chValue;
@@ -151,12 +136,9 @@ void ofApp::draw()
     ImGui::StyleColorsDark();
     ImGui::SetWindowPos(ofVec2f(1180,5),ImGuiSetCond_FirstUseEver); // ??? Doesn't work
     ImGui::Begin("Led Mapper", NULL, window_flags);
-    
-    //cout << ImGui::GetIO().MouseDelta.x << " " << ImGui::GetIO().MouseDelta.y;
-
-    ImGui::Text(" Controller IP");
+    ImGui::Text("Controller IP");
     ImGui::InputText("",ipAdress, 15);
-    ImGui::Text(" Num of Universes");
+    ImGui::Text("Num of Universes");
     ImGui::InputInt(" ",&totalNumUn);
     
         if(ImGui::Button("Save controller")){
@@ -175,16 +157,26 @@ void ofApp::draw()
     ImGui::PopStyleColor(1);
     ImGui::PopID();
     ImGui::Checkbox("Syphon fullscreen", &resizeMode);
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    
+    //Abans ficar les coses que toquen, si ja hem afegit una tira, despres
+    
+    ImGui::Text("Fixture config");
+    ImGui::Text("Num LEDs");
+    ImGui::InputInt("  ",&auxNumLeds);
+    ImGui::Text("Start Universe");
+    ImGui::InputInt("   ",&auxStartUn);
+    ImGui::Text("Start Channel");
+    ImGui::InputInt("   ",&auxStartCh);
     
     if (ImGui::Button("Add Nex Fixture")){
         myLedStrips.push_back(LedStrip());
         updateStripsId();
-        
-        if (myLedStrips.size() == 1){
-            myLedStrips[0].setChUn(0,0);
-        } else {
-            //TO-DO: Get last previous element of myLedStrips and get his last CH and UN to get "automatic" setup of DMX
-        }
+        myLedStrips.back().setup(auxNumLeds,auxStartUn,auxStartCh);
+        auxStartUn = myLedStrips.back().getLastChLastUn().second;
+        auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
         //cout << myLedStrips.size();
     }
     
@@ -228,9 +220,17 @@ void ofApp::updateStripsId(){
 void ofApp::keyPressed(int key)
 {
     if ( key == OF_KEY_BACKSPACE || key == OF_KEY_DEL){
-        if ((myLedStrips.size() > 0) && (ledStripFlag != -1))
+        if ((myLedStrips.size() > 0) && (ledStripFlag != -1)){
         myLedStrips.erase(myLedStrips.begin() + ledStripFlag);
-        updateStripsId();
+            updateStripsId();
+            if ( (myLedStrips.size() > 0)){
+            auxStartUn = myLedStrips.back().getLastChLastUn().second;
+            auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
+            } else {
+                auxStartUn = 0;
+                auxStartCh = 0;
+            }
+        }
     }
 }
 //--------------------------------------------------------------
@@ -248,10 +248,11 @@ void ofApp::mouseMoved(int x, int y)
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button)
 {
-     for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
+     /*for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
          (*itLS).move(x,y);
-     }
-     //cout << "test   " << x << " , " << y << " , " << button << endl;
+     }*/
+    //BUG: When we have more than two strips the ID of the first gets overwritten?
+    if(ledStripFlag!= -1) myLedStrips[ledStripFlag].move(x,y);
 }
 
 //--------------------------------------------------------------
@@ -260,17 +261,15 @@ void ofApp::mousePressed(int x, int y, int button)
         /*if(button == 0){
             mouseState = true;
         }*/
-    
     //BUG: When we have more than two strips the ID of the first gets overwritten
-    if(!idAssignDone){
-        for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
-            if((*itLS).mouseInside(x,y) ){
+    for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
+        if(!idAssignDone){
+            if((*itLS).mouseInside(x,y) ){ //Very frequent problems detecting mouseInside ????
                 cout << "MOUSE INSIDE" << endl;
                 ledStripFlag = (*itLS).getId();
                 idAssignDone = true;
                 } else{
                     ledStripFlag = -1;
-                    idAssignDone = true;
                 }
         }
     cout << ledStripFlag << endl;
