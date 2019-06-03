@@ -1,5 +1,5 @@
 # openLedMapper
-[Work in progress] Led Mapping software that receives a Syphon source and maps pixels to led strips fixtures through Artnet generic controllers. Coded in openFrameworks, part of my final degree thesis.
+[Work in progress] Led Mapping software that receives a Syphon source and maps pixels to led strips fixtures through Artnet generic controllers. Coded in openFrameworks, part of my final degree thesis, under the supervision of @Dazzid
 
 ![alt text](https://raw.githubusercontent.com/albert-ka/openLedMapper/master/openLedMapper.png)
 
