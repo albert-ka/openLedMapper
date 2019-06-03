@@ -16,8 +16,10 @@ LedStrip::LedStrip(){
 }
 void LedStrip::setup(int _numLeds, int _firstUn,  int _firstCh){
     
-    x1y1.set(500,50);
-    x2y2.set(800,50);
+    int randX = ofRandom(50);
+    int randY = ofRandom(50);
+    x1y1.set(500+randX,50+randY);
+    x2y2.set(800+randX,50+randY);
     numLeds = _numLeds;
     length = x1y1.distance(x2y2); // By now unused, is it necessary?
     stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
@@ -88,10 +90,23 @@ void LedStrip::setup(int _numLeds, int _firstUn,  int _firstCh){
 void LedStrip::setID(int _stripID){
     stripID = _stripID;
 }
-
-int LedStrip::getId(){
+void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
     
-    return stripID;
+    x1y1 = _x1y1;
+    x2y2 = _x2y2;
+    length = x1y1.distance(x2y2); // By now unused, is it necessary?
+    stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
+    stepY = (x2y2[1]-x1y1[1])/(numLeds*2);
+    radius = round(sqrt(stepX*stepX+stepY*stepY)); //TODO: Radius automatic or adjusted through the GUI???
+    
+    //Here we assing the position of every LED, note the round inside ofVec2f due to we work with -float- increments but -int- pixels
+    
+    int counter = 0;
+    for (int i=1; i<numLeds*2; i=i+2){
+        myLedStripPixels.at(counter).position = ofVec2f(round(x1y1[0]+i*stepX) , round(x1y1[1]+i*stepY));
+        myLedStripPixels.at(counter).ledIndex = counter+1; //Id of the pixels, first LED = 1
+        counter++;
+    }
 }
 void LedStrip::setChUn(int _firstCh, int _firstUn){
     
@@ -100,7 +115,7 @@ void LedStrip::setChUn(int _firstCh, int _firstUn){
     numCh = numLeds*3; // By now R-G-B only Led Strips
     lastCh = 0; // TO DO: Read the last element of myLedStripChannels.channel
     lastUn = 0; // TO DO: Read the last element of myLedStripChannels.chUniverse
-
+    
     //If we full all the "usable" channels of the universe, reset channel and increase universe
     //For example the usable channels of one universe go from 0.....509, 510 and 511 are not used (?)
     //so once we exceed the channel 509 we have to send to the next universe.
@@ -111,18 +126,15 @@ void LedStrip::setChUn(int _firstCh, int _firstUn){
     for( int i = 0; i<numCh; i++){
         
         unsigned char zero = '0';
-        
         if ( (((firstCh + channel) == 510) && universe == 0) || (channel == 510) ){
             channel = 0;
             universe++;
         }
-        
         if (universe == 0 ){
             myLedStripChannels.at(i).channel = firstCh + channel;
         }else {
             myLedStripChannels.at(i).channel = channel;
         }
-
         myLedStripChannels.at(i).chValue = zero;
         myLedStripChannels.at(i).chUniverse = firstUn + universe;
         channel++;
@@ -130,6 +142,15 @@ void LedStrip::setChUn(int _firstCh, int _firstUn){
     lastCh = myLedStripChannels.at(numCh-1).channel;
     lastUn = myLedStripChannels.at(numCh-1).chUniverse;
     
+}
+
+int LedStrip::getId(){
+    
+    return stripID;
+}
+int LedStrip::getNumLeds(){
+    
+    return numLeds;
     
 }
 void LedStrip::move(int x, int y){
@@ -152,26 +173,6 @@ void LedStrip::move(int x, int y){
 }
 bool LedStrip::mouseInside(int x,int y){
     
-    /*if((x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius))) cout << "X inside" << endl;
-    if((y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))) cout << "Y inside" << endl;
-        
-    if ((x > (x1y1[0]-radius)) && (x < (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))){
-        return true;
-    } else if ((x < (x1y1[0]-radius)) && (x > (x2y2[0]+radius)) && (y > (x1y1[1]-radius)) && (y < (x2y2[1]+radius))){
-        return true;
-    } else return false;*/
-
-    
-    /*bool aux;
-    for (int i=0; i<numLeds; i++){
-        if((pow(myLedStripPixels.at(i).position.x-x,2) + pow(myLedStripPixels.at(i).position.y-y,2)) < (radius,2)){
-            aux =  true;
-            goto afterLoop;
-        } else aux = false;
-    }
-    afterLoop:
-    return aux;*/
-    
      bool aux;
      for (int i=0; i<numLeds; i++){
          if(ofDist(x,y,myLedStripPixels.at(i).position.x,myLedStripPixels.at(i).position.y) <= (radius)){
@@ -182,25 +183,6 @@ bool LedStrip::mouseInside(int x,int y){
      afterLoop:
      return aux;
 }
-void LedStrip::setPosition(ofVec2f _x1y1, ofVec2f _x2y2){
-    
-    x1y1 = _x1y1;
-    x2y2 = _x2y2;
-    length = x1y1.distance(x2y2); // By now unused, is it necessary?
-    stepX = (x2y2[0]-x1y1[0])/(numLeds*2);
-    stepY = (x2y2[1]-x1y1[1])/(numLeds*2);
-    radius = round(sqrt(stepX*stepX+stepY*stepY)); //TODO: Radius automatic or adjusted through the GUI???
-    
-    //Here we assing the position of every LED, note the round inside ofVec2f due to we work with -float- increments but -int- pixels
-    
-    int counter = 0;
-    for (int i=1; i<numLeds*2; i=i+2){
-        myLedStripPixels.at(counter).position = ofVec2f(round(x1y1[0]+i*stepX) , round(x1y1[1]+i*stepY));
-        myLedStripPixels.at(counter).ledIndex = counter+1; //Id of the pixels, first LED = 1
-        counter++;
-    }
-}
-
 void LedStrip::readPixels(ofPixels & screenPixels){
 
     for (int i=0; i<numLeds; i++){
@@ -209,10 +191,8 @@ void LedStrip::readPixels(ofPixels & screenPixels){
         myLedStripPixels.at(i).ledColor[1] = screenPixels[indexArray+1];
         myLedStripPixels.at(i).ledColor[2] = screenPixels[indexArray+2];
     }
-    
     // TODO: Si el color es el mismo, no leer otra vez, por lo tanto "break"
 }
-
 int LedStrip::getNumCh(){
     
     return numCh;
@@ -225,7 +205,6 @@ std::pair<int,int> LedStrip::getFirstChFirstUn(){
     
     return firstLastCh;
 }
-
 std::pair<int,int> LedStrip::getLastChLastUn(){
     
     std::pair<int,int> firstLastUn;
@@ -253,7 +232,6 @@ vector <LedStrip::ledStripChannels> LedStrip::getChannels(){
 }
 void LedStrip::drawNoFill(int _ledStripFlag){
     
-    //color = _c;
     ofNoFill();
     
     if ( _ledStripFlag == stripID){
@@ -278,6 +256,10 @@ void LedStrip::drawColor(){
         circle.close();
         circle.setColor(ofColor(r,g,b));
         circle.draw();
-            
     }
+}
+void LedStrip::drawLine(){
+
+    ofDrawLine(x1y1.x,x1y1.y,x2y2.x,x2y2.y);
+    
 }

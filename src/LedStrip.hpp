@@ -19,15 +19,19 @@ public:
     
     void setup(int _numLeds, int _startUniverse, int _firstChannel); // Here we are going to setup or LedStripe properties
     void setID(int _stripId);
-    int getId();
+    void setPosition(ofVec2f _x1y1, ofVec2f _x2y2); // To update the position while moving through the GUI
+    void setChUn(int _firstCh, int _firstUn);
+        
     void move(int x, int y);
     bool mouseInside(int x,int y);
     void readPixels(ofPixels & screenPixels); // Here we are going to read the pixels and store it
     void drawNoFill(int _ledStripFlag); // Here we are going to draw the LedStripe in our program
     void drawColor(); // Here we are going to draw the LedStripe in our program
-    void setPosition(ofVec2f _x1y1, ofVec2f _x2y2); // To update the position while moving through the GUI
-    void setChUn(int _firstCh, int _firstUn);
+    void drawLine(); // Here we are going to draw the LedStripe in our program
+
+    int getId();
     int getNumCh();
+    int getNumLeds();
     
     std::pair<int,int> getFirstChFirstUn();
     std::pair<int,int> getLastChLastUn();

@@ -76,7 +76,7 @@ void ofApp::update()
     // -- TODO: Create function "Route to artnet" or something simillar? -- //
     
             // ***** FRAMERATE DROP!!!! OPTIMIZE THIS PART!!! ***** //
-    
+   
     for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
         //Read pixels from buffer to LedStrip instances
         (*itLS).readPixels(screenPixels);
@@ -101,7 +101,7 @@ void ofApp::draw()
     //ofColor(255, 255, 255, 255);
     //ofEnableAlphaBlending();
     
-    if(dir.isValidIndex(dirIdx) && (drawMode == 0 || drawMode == 1)){
+    if(dir.isValidIndex(dirIdx) && (drawMode == 0 || drawMode == 1 || drawMode == 3)){
         ofSetColor(255, 255, 255);
         if (resizeMode){
             texFromSyphon.draw(0,0,1280,800);
@@ -114,10 +114,12 @@ void ofApp::draw()
         if(drawMode == 0){
             (*itLS).drawNoFill(ledStripFlag);
         } else if (drawMode == 1){
-            (*itLS).drawColor();
+            (*itLS).drawColor(); // CAUTION! FRAME RATE DROP!
             (*itLS).drawNoFill(ledStripFlag);
         }else if (drawMode == 2){
-            (*itLS).drawColor();
+            (*itLS).drawColor(); // CAUTION! FRAME RATE DROP!
+        } else if (drawMode == 3){
+            (*itLS).drawLine();
         }
     }
     
@@ -128,14 +130,25 @@ void ofApp::draw()
     // ---- **** ImGUI **** ---- //
     
     ImGuiWindowFlags window_flags = 0;
-    //window_flags |= ImGuiWindowFlags_NoMove;
-    //window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoResize;
+    window_flags |= ImGuiWindowFlags_MenuBar;
+    //window_flags |= ImGuiWindowFlags_NoScrollbar;
     
     gui.begin();
     gui.setTheme(new MyTheme());
     ImGui::StyleColorsDark();
-    ImGui::SetWindowPos(ofVec2f(1180,5),ImGuiSetCond_FirstUseEver); // ??? Doesn't work
-    ImGui::Begin("Led Mapper", NULL, window_flags);
+    ImGui::SetNextWindowPos(ofVec2f(1115,5),ImGuiSetCond_FirstUseEver); // ??? Doesn't work
+    ImGui::Begin("openLedMapper", NULL, window_flags);
+    ImGui::BeginMenuBar();
+    
+        if (ImGui::BeginMenu("Menu")){
+            ImGui::MenuItem("Save as", NULL);
+            ImGui::MenuItem("Open", NULL);
+            ImGui::EndMenu();
+        }
+    
+    ImGui::EndMenuBar();
     ImGui::Text("Controller IP");
     ImGui::InputText("",ipAdress, 15);
     ImGui::Text("Num of Universes");
@@ -147,10 +160,10 @@ void ofApp::draw()
         };
     
     ImGui::Text("Drawing Modes:");
-    ImGui::RadioButton("1", &drawMode, 0); ImGui::SameLine();
-    ImGui::RadioButton("2", &drawMode, 1); ImGui::SameLine();
-    ImGui::RadioButton("3", &drawMode, 2);
-    
+    ImGui::RadioButton("Circle", &drawMode, 0);
+    ImGui::RadioButton("Circle + Color", &drawMode, 1);
+    ImGui::RadioButton("Only Color", &drawMode, 2);
+    ImGui::RadioButton("Performance mode", &drawMode, 3);
     ImGui::PushID(1);
     ImGui::PushStyleColor(ImGuiCol_Button, ofColor(100));
     if(ImGui::Button("Swap SYPHON")) swapSyphon();
@@ -163,7 +176,7 @@ void ofApp::draw()
     
     //Abans ficar les coses que toquen, si ja hem afegit una tira, despres
     
-    ImGui::Text("Nex Fixture config:");
+    ImGui::Text("Next Fixture config:");
     ImGui::Text("Num LEDs");
     ImGui::InputInt("  ",&auxNumLeds);
     ImGui::Text("Start Universe");
@@ -179,7 +192,24 @@ void ofApp::draw()
         auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
         //cout << myLedStrips.size();
     }
-    
+    /*ImGui::PushID(1);
+    ImGui::PushStyleColor(ImGuiCol_Button, ofColor(200,50,0));
+    if (ImGui::Button("Delete Fixture")){
+        if ((myLedStrips.size() > 0) && (ledStripFlag != -1)){
+            myLedStrips.erase(myLedStrips.begin() + ledStripFlag);
+            updateStripsId();
+            ledStripFlag = -1;
+            if ( (myLedStrips.size() > 0)){
+                auxStartUn = myLedStrips.back().getLastChLastUn().second;
+                auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
+            } else {
+                auxStartUn = 0;
+                auxStartCh = 0;
+            }
+        }
+    }
+    ImGui::PopStyleColor(1);
+    ImGui::PopID();*/
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
@@ -188,19 +218,13 @@ void ofApp::draw()
     if(ledStripFlag == -1){
          ImGui::TextColored(ImVec4(1.0f,0.0f,0.0f,1.0f), "No fixture selected!");
     }else {
-        ImGui::Text("Some things to do here...");
+        ImGui::Text("Fixture ID:"); ImGui::SameLine();
+        ImGui::TextColored(ImVec4(1.0f,0.0f,0.0f,1.0f),"%d",ledStripFlag);
+        ImGui::Text("Num LEDs:");
+        int auxFlagNumLeds = myLedStrips.at(ledStripFlag).getNumLeds();
+        ImGui::InputInt("   ",&auxNumLeds);
+        //myLedStrips.at(ledStripFlag).updateNumLeds(auxFlagNumLeds);
     }
-    
-    //TO-DO: Cool delete button in red, dilema with the ledStripFlag, gets updated to -1 when pressing the button, it never erases anything.
-    //ImGui::PushID(2);
-    //ImGui::PushStyleColor(ImGuiCol_Button, ofColor(200,50,0));
-    //if (ImGui::Button("Delete Fixture")){
-    //    if ((myLedStrips.size() > 0) && (ledStripFlag != -1))
-    //        myLedStrips.erase(myLedStrips.begin() + ledStripFlag);
-    //}
-    //ImGui::PopStyleColor(2);
-    //ImGui::PopID();
-    
     ImGui::End();
     //required to call this at end
     gui.end();
@@ -232,14 +256,15 @@ void ofApp::keyPressed(int key)
 {
     if ( key == OF_KEY_BACKSPACE || key == OF_KEY_DEL){
         if ((myLedStrips.size() > 0) && (ledStripFlag != -1)){
-        myLedStrips.erase(myLedStrips.begin() + ledStripFlag);
+            myLedStrips.erase(myLedStrips.begin() + ledStripFlag);
             updateStripsId();
-            if ( (myLedStrips.size() > 0)){
-            auxStartUn = myLedStrips.back().getLastChLastUn().second;
-            auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
-            } else {
-                auxStartUn = 0;
-                auxStartCh = 0;
+            ledStripFlag = -1;
+                if ( (myLedStrips.size() > 0)){
+                    auxStartUn = myLedStrips.back().getLastChLastUn().second;
+                    auxStartCh = myLedStrips.back().getLastChLastUn().first+1;
+                } else {
+                    auxStartUn = 0;
+                    auxStartCh = 0;
             }
         }
     }
@@ -269,21 +294,18 @@ void ofApp::mouseDragged(int x, int y, int button)
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button)
 {
-        /*if(button == 0){
-            mouseState = true;
-        }*/
-    //BUG: When we have more than two strips the ID of the first gets overwritten
+    ImGuiIO& io = ImGui::GetIO();
     for(vector<LedStrip>::iterator itLS = myLedStrips.begin(); itLS != myLedStrips.end(); ++itLS){
         if(!idAssignDone){
-            if((*itLS).mouseInside(x,y) ){ //Very frequent problems detecting mouseInside ????
-                cout << "MOUSE INSIDE" << endl;
+            if((*itLS).mouseInside(x,y) ){
+                //cout << "MOUSE INSIDE" << endl;
                 ledStripFlag = (*itLS).getId();
                 idAssignDone = true;
-                } else{
+                } else if(io.WantCaptureMouse != 1){
                     ledStripFlag = -1;
                 }
         }
-    cout << ledStripFlag << endl;
+    //cout << ledStripFlag << endl;
     }
 }
 
